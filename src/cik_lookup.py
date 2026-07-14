@@ -7,7 +7,8 @@ class SecEdgar:
         self.name_dict = {}
         self.ticker_dict = {}
 
-        response = requests.get(self.fileurl, headers=self.headers)
+        response = requests.get(self.fileurl, headers=self.headers, timeout=10)
+        response.raise_for_status()
 
         self.filejson = response.json()
 
@@ -28,7 +29,8 @@ class SecEdgar:
 
     def _get_company_submissions(self, cik):
         url = f"https://data.sec.gov/submissions/CIK{str(cik).zfill(10)}.json"
-        response = requests.get(url, headers=self.headers)
+        response = requests.get(url, headers=self.headers, timeout=10)
+        response.raise_for_status()
         return response.json()
 
     def _fiscal_year_and_quarter(self, report_date, fiscal_year_end):
@@ -69,6 +71,8 @@ class SecEdgar:
                 primaryDocument = recent_filings['primaryDocument'][i]
                 url = f"https://www.sec.gov/Archives/edgar/data/{str(cik).zfill(10)}/{accessionNumber}/{primaryDocument}"
                 return accessionNumber, primaryDocument, url
+
+        return None
 
     def annual_filing(self, cik, year):
         form_type = "10-K"
